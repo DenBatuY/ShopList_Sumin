@@ -8,7 +8,7 @@ interface ShopListRepository {
 
     fun editShopItemUseCase(shopItem: ShopItem)
 
-    fun getShopItem():ShopItem
+    fun getShopItem(ShopItemId:Int):ShopItem
 
     fun getShopList():List<ShopItem>
 }
