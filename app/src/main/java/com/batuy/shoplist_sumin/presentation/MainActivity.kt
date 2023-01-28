@@ -11,13 +11,17 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        var a =0
 
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
 
         viewModel.shopList.observe(this){
             Log.d("test", it.toString())
+            if (a==0){
+                viewModel.deleteShopItem(it[0])
+                a++
+            }
         }
 
-        viewModel.getShopList()
     }
 }
