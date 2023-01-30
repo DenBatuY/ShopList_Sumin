@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">ShopList_Sumin</string>
     <string name="add_new_ite">Add new ite</string>
+    <string name="name">Name</string>
+    <string name="error_input_count">Error input count</string>
+    <string name="error_input_name">Error input name</string>
+    <string name="count">Count</string>
 </resources>
