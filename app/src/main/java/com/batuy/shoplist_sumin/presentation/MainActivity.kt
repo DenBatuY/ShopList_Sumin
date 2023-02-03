@@ -1,8 +1,12 @@
 package com.batuy.shoplist_sumin.presentation
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -10,14 +14,18 @@ import com.batuy.shoplist_sumin.R
 import com.batuy.shoplist_sumin.domain.ShopItem
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(),ShopItemFragment.OnEditingFinishedListener {
     private lateinit var viewModel: MainViewModel
     private lateinit var adapter: ShopListAdapter
     private lateinit var recyclerView: RecyclerView
 
+    private var shopItemContainerLand: FragmentContainerView? = null
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        shopItemContainerLand = findViewById(R.id.shop_item_container)
 
         recyclerView = findViewById(R.id.rcView)
         adapter = ShopListAdapter()
@@ -41,15 +49,32 @@ class MainActivity : AppCompatActivity() {
         }
 
         adapter.onShopItemClickListener = {
-            startActivity(ShopItemActivity.newIntentEditItem(this,it.id))
-            Log.d("test", it.toString())
+            if (isOnePaneMode()) {
+                startActivity(ShopItemActivity.newIntentEditItem(this, it.id))
+            } else {
+                launchFragment(ShopItemFragment.newInstanceEditItem(it.id))
+            }
         }
 
         findViewById<FloatingActionButton>(R.id.floatingActionButton).setOnClickListener {
-            startActivity(ShopItemActivity.newIntentAddItem(this))
+            if (isOnePaneMode()) {
+                startActivity(ShopItemActivity.newIntentAddItem(this))
+            } else {
+                launchFragment(ShopItemFragment.newInstanceAddItem())
+            }
         }
 
         setupSwipeDeleteItem()
+    }
+
+    private fun isOnePaneMode(): Boolean {
+        return shopItemContainerLand == null
+    }
+
+    private fun launchFragment(fragment: Fragment) {
+        supportFragmentManager.popBackStack()
+        supportFragmentManager.beginTransaction().replace(R.id.shop_item_container, fragment)
+            .addToBackStack(null).commit()
     }
 
     private fun setupSwipeDeleteItem() {
@@ -71,6 +96,11 @@ class MainActivity : AppCompatActivity() {
         }
         val itemTouchHelper = ItemTouchHelper(callback)
         itemTouchHelper.attachToRecyclerView(recyclerView)
+    }
+
+    override fun onEditingFinished() {
+        Toast.makeText(this@MainActivity,"Success",Toast.LENGTH_SHORT).show()
+        supportFragmentManager.popBackStack()
     }
 
 
