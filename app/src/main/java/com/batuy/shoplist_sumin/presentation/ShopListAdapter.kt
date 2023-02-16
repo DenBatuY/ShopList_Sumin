@@ -1,14 +1,13 @@
 package com.batuy.shoplist_sumin.presentation
 
-import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.recyclerview.widget.DiffUtil
+import androidx.databinding.DataBindingUtil
+import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
 import com.batuy.shoplist_sumin.R
+import com.batuy.shoplist_sumin.databinding.ItemShopDisabledBinding
+import com.batuy.shoplist_sumin.databinding.ItemShopEnabledBinding
 import com.batuy.shoplist_sumin.domain.ShopItem
 
 class ShopListAdapter : ListAdapter<ShopItem, ShopItemViewHolder>(ShopItemDiffCallback()) {
@@ -23,20 +22,36 @@ class ShopListAdapter : ListAdapter<ShopItem, ShopItemViewHolder>(ShopItemDiffCa
             DISABLED -> R.layout.item_shop_disabled
             else -> throw RuntimeException("Unknown viewType  $viewType")
         }
-        val view = LayoutInflater.from(parent.context).inflate(layout, parent, false)
-        return ShopItemViewHolder(view)
+        val binding = DataBindingUtil.inflate<ViewDataBinding>(
+            LayoutInflater.from(parent.context),
+            layout,
+            parent,
+            false
+        )
+        return ShopItemViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ShopItemViewHolder, position: Int) {
         val shopItem = getItem(position)
+        val binding = holder.binding
 
-        holder.tvName.text = shopItem.name
-        holder.tvCount.text = shopItem.count
-        holder.itemView.setOnLongClickListener {
+        when (binding) {
+            is ItemShopDisabledBinding -> {
+                binding.tvName.text = shopItem.name
+                binding.tvCount.text = shopItem.count
+            }
+            is ItemShopEnabledBinding -> {
+                binding.tvName.text = shopItem.name
+                binding.tvCount.text = shopItem.count
+            }
+        }
+
+
+        binding.root.setOnLongClickListener {
             onShopItemLongClickListener?.invoke(shopItem)
             true
         }
-        holder.itemView.setOnClickListener {
+        binding.root.setOnClickListener {
             onShopItemClickListener?.invoke(shopItem)
         }
     }

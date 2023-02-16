@@ -1,53 +1,45 @@
 package com.batuy.shoplist_sumin.data
 
+import android.app.Application
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import com.batuy.shoplist_sumin.domain.ShopItem
 import com.batuy.shoplist_sumin.domain.ShopListRepository
 import kotlin.random.Random
 
-object ShopListRepositoryImpl : ShopListRepository {
+class ShopListRepositoryImpl(application: Application) : ShopListRepository {
 
-    private val shopListLD = MutableLiveData<List<ShopItem>>()
-    private val shopList = sortedSetOf<ShopItem>({o1,o2->o1.id.compareTo(o2.id)})
-    private var autoIncrementId = 0
+    private val shopListDao = AppDataBase.getInstance(application).shopListDao()
+    private val mapper = ShopListMapper()
 
-    init {
-        for (i in 1..1000) {
-            val item = ShopItem("Name $i", i.toString(), Random.nextBoolean())
-            addShopItem(item)
+
+     override suspend fun addShopItem(shopItem: ShopItem) {
+        shopListDao.addShopItem(mapper.mapEntityToDbModel(shopItem))
+    }
+
+     override suspend fun deleteShopItem(shopItem: ShopItem) {
+        shopListDao.deleteShopItem(shopItem.id)
+    }
+
+     override suspend fun editShopItemUseCase(shopItem: ShopItem) {
+        shopListDao.addShopItem(mapper.mapEntityToDbModel(shopItem))
+    }
+
+     override suspend fun getShopItem(shopItemId: Int): ShopItem {
+        val dbModel = shopListDao.getShopItem(shopItemId)
+        return mapper.mapDbModelToEntity(dbModel)
+    }
+
+     override fun getShopList(): LiveData<List<ShopItem>> =
+        Transformations.map(shopListDao.getShopList()) {
+            mapper.mapListDbModelToListEntity(it)
         }
-    }
+//        MediatorLiveData<List<ShopItem>>().apply {
+//            addSource(shopListDao.getShopList()) {
+//                value = mapper.mapListDbModelToListEntity(it)
+//            }
+//        }
 
-    override fun addShopItem(shopItem: ShopItem) {
-        if (shopItem.id == ShopItem.UNDEFINED_ID) {
-            shopItem.id = autoIncrementId++
-        }
-        shopList.add(shopItem)
-        updateList()
-    }
-
-    override fun deleteShopItem(shopItem: ShopItem) {
-        shopList.remove(shopItem)
-        updateList()
-    }
-
-    override fun editShopItemUseCase(shopItem: ShopItem) {
-        val oldElement = getShopItem(shopItem.id)
-        shopList.remove(oldElement)
-        addShopItem(shopItem)
-    }
-
-    override fun getShopItem(shopItemId: Int): ShopItem {
-        return shopList.find { it.id == shopItemId }
-            ?: throw RuntimeException("Element with Id$shopItemId not found")
-    }
-
-    override fun getShopList(): LiveData<List<ShopItem>> {
-        return shopListLD
-    }
-
-    private fun updateList() {
-        shopListLD.value = shopList.toList()
-    }
 }

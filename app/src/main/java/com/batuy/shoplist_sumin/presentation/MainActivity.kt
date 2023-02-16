@@ -1,8 +1,7 @@
 package com.batuy.shoplist_sumin.presentation
 
-import android.annotation.SuppressLint
+import android.app.Activity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -11,25 +10,24 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.batuy.shoplist_sumin.R
-import com.batuy.shoplist_sumin.domain.ShopItem
+import com.batuy.shoplist_sumin.databinding.ActivityMainBinding
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-class MainActivity : AppCompatActivity(),ShopItemFragment.OnEditingFinishedListener {
+class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedListener {
     private lateinit var viewModel: MainViewModel
     private lateinit var adapter: ShopListAdapter
     private lateinit var recyclerView: RecyclerView
-
-    private var shopItemContainerLand: FragmentContainerView? = null
-
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        shopItemContainerLand = findViewById(R.id.shop_item_container)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        recyclerView = findViewById(R.id.rcView)
+        recyclerView = binding.rcView
         adapter = ShopListAdapter()
         recyclerView.adapter = adapter
+
         recyclerView.recycledViewPool.setMaxRecycledViews(
             ShopListAdapter.ENABLED,
             ShopListAdapter.MAX_ITEM_POOL
@@ -56,7 +54,7 @@ class MainActivity : AppCompatActivity(),ShopItemFragment.OnEditingFinishedListe
             }
         }
 
-        findViewById<FloatingActionButton>(R.id.floatingActionButton).setOnClickListener {
+        binding.floatingActionButton.setOnClickListener {
             if (isOnePaneMode()) {
                 startActivity(ShopItemActivity.newIntentAddItem(this))
             } else {
@@ -68,7 +66,7 @@ class MainActivity : AppCompatActivity(),ShopItemFragment.OnEditingFinishedListe
     }
 
     private fun isOnePaneMode(): Boolean {
-        return shopItemContainerLand == null
+        return binding.shopItemContainer == null
     }
 
     private fun launchFragment(fragment: Fragment) {
@@ -99,7 +97,7 @@ class MainActivity : AppCompatActivity(),ShopItemFragment.OnEditingFinishedListe
     }
 
     override fun onEditingFinished() {
-        Toast.makeText(this@MainActivity,"Success",Toast.LENGTH_SHORT).show()
+        Toast.makeText(this@MainActivity, "Success", Toast.LENGTH_SHORT).show()
         supportFragmentManager.popBackStack()
     }
 
