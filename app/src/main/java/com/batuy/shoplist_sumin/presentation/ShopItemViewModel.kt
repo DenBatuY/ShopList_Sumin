@@ -11,16 +11,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ShopItemViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val repository = ShopListRepositoryImpl(application)
-
-
-
-    private val getShopItemUseCase = GetShopItemUseCase(repository)
-    private val addShopItemUseCase = AddShopItemUseCase(repository)
-    private val editShopItemUseCase = EditShopItemUseCase(repository)
+class ShopItemViewModel @Inject constructor(
+    private val getShopItemUseCase: GetShopItemUseCase,
+    private val addShopItemUseCase: AddShopItemUseCase,
+    private val editShopItemUseCase: EditShopItemUseCase
+) : ViewModel() {
 
 
     private val _errorInputName = MutableLiveData<Boolean>()
@@ -49,11 +46,11 @@ class ShopItemViewModel(application: Application) : AndroidViewModel(application
 
     fun addShopItem(inputName: String?, inputCount: String?) {
 
-            val name = parseName(inputName)
-            val count = parseCount(inputCount)
-            val fieldsValid = validateInput(name, count)
-            if (fieldsValid) {
-                viewModelScope.launch {
+        val name = parseName(inputName)
+        val count = parseCount(inputCount)
+        val fieldsValid = validateInput(name, count)
+        if (fieldsValid) {
+            viewModelScope.launch {
                 val shopItem = ShopItem(name, count.toString(), true)
                 addShopItemUseCase.addShopItem(shopItem)
                 finishWork()
@@ -64,12 +61,12 @@ class ShopItemViewModel(application: Application) : AndroidViewModel(application
 
     fun editShopItem(inputName: String?, inputCount: String?) {
 
-            val name = parseName(inputName)
-            val count = parseCount(inputCount)
-            val fieldsValid = validateInput(name, count)
+        val name = parseName(inputName)
+        val count = parseCount(inputCount)
+        val fieldsValid = validateInput(name, count)
 
-            if (fieldsValid) {
-                viewModelScope.launch {
+        if (fieldsValid) {
+            viewModelScope.launch {
                 _shopItem.value?.let {
                     val item = it.copy(name = name, count = count.toString())
                     editShopItemUseCase.editShopItem(item)

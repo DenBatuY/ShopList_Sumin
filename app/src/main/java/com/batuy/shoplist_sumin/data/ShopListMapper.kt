@@ -1,8 +1,9 @@
 package com.batuy.shoplist_sumin.data
 
 import com.batuy.shoplist_sumin.domain.ShopItem
+import javax.inject.Inject
 
-class ShopListMapper {
+class ShopListMapper @Inject constructor() {
 
     fun mapEntityToDbModel(shopItem: ShopItem): ShopItemDbModel {
         return ShopItemDbModel(

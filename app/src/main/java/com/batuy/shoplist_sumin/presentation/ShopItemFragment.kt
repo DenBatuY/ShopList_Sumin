@@ -1,5 +1,6 @@
 package com.batuy.shoplist_sumin.presentation
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.text.Editable
@@ -11,11 +12,22 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.batuy.shoplist_sumin.databinding.FragmentShopItemBinding
 import com.batuy.shoplist_sumin.domain.ShopItem
+import javax.inject.Inject
 
 class ShopItemFragment : Fragment() {
 
     private lateinit var viewModel: ShopItemViewModel
     lateinit var onEditingFinishedListener: OnEditingFinishedListener
+      @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+    private val component by lazy {
+        (requireActivity().application as ShoppingListApp).component
+    }
+
+    override fun onAttach(activity: Activity) {
+        component.inject(this)
+        super.onAttach(activity)
+    }
 
 
     private lateinit var binding: FragmentShopItemBinding
@@ -51,7 +63,7 @@ class ShopItemFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
 
-        viewModel = ViewModelProvider(this)[ShopItemViewModel::class.java]
+        viewModel = ViewModelProvider(this,viewModelFactory)[ShopItemViewModel::class.java]
 
         binding.viewModel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner

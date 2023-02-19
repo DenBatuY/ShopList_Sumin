@@ -7,32 +7,34 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import com.batuy.shoplist_sumin.domain.ShopItem
 import com.batuy.shoplist_sumin.domain.ShopListRepository
+import javax.inject.Inject
 import kotlin.random.Random
 
-class ShopListRepositoryImpl(application: Application) : ShopListRepository {
+class ShopListRepositoryImpl @Inject constructor(
+    private val application: Application,
+    private val mapper: ShopListMapper,
+    private val shopListDao:ShopListDao
+) : ShopListRepository {
 
-    private val shopListDao = AppDataBase.getInstance(application).shopListDao()
-    private val mapper = ShopListMapper()
 
-
-     override suspend fun addShopItem(shopItem: ShopItem) {
+    override suspend fun addShopItem(shopItem: ShopItem) {
         shopListDao.addShopItem(mapper.mapEntityToDbModel(shopItem))
     }
 
-     override suspend fun deleteShopItem(shopItem: ShopItem) {
+    override suspend fun deleteShopItem(shopItem: ShopItem) {
         shopListDao.deleteShopItem(shopItem.id)
     }
 
-     override suspend fun editShopItemUseCase(shopItem: ShopItem) {
+    override suspend fun editShopItemUseCase(shopItem: ShopItem) {
         shopListDao.addShopItem(mapper.mapEntityToDbModel(shopItem))
     }
 
-     override suspend fun getShopItem(shopItemId: Int): ShopItem {
+    override suspend fun getShopItem(shopItemId: Int): ShopItem {
         val dbModel = shopListDao.getShopItem(shopItemId)
         return mapper.mapDbModelToEntity(dbModel)
     }
 
-     override fun getShopList(): LiveData<List<ShopItem>> =
+    override fun getShopList(): LiveData<List<ShopItem>> =
         Transformations.map(shopListDao.getShopList()) {
             mapper.mapListDbModelToListEntity(it)
         }

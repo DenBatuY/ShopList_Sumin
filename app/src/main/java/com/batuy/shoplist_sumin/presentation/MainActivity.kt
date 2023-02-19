@@ -12,14 +12,21 @@ import androidx.recyclerview.widget.RecyclerView
 import com.batuy.shoplist_sumin.R
 import com.batuy.shoplist_sumin.databinding.ActivityMainBinding
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedListener {
     private lateinit var viewModel: MainViewModel
     private lateinit var adapter: ShopListAdapter
     private lateinit var recyclerView: RecyclerView
     private lateinit var binding: ActivityMainBinding
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+    private val component by lazy {
+        (application as ShoppingListApp).component
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        component.inject(this)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -36,7 +43,7 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedList
             ShopListAdapter.DISABLED,
             ShopListAdapter.MAX_ITEM_POOL
         )
-        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
+        viewModel = ViewModelProvider(this,viewModelFactory)[MainViewModel::class.java]
 
         viewModel.shopList.observe(this) {
             adapter.submitList(it)
